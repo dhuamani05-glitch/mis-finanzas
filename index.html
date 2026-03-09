@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas Control Total 💰</title>
+    <title>Finanzas Swipe 💰</title>
     
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,140 +13,165 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
-        :root { --primary: #4e73df; --bg: #f8f9fc; --success: #2ecc71; --danger: #e74c3c; --dark: #2d3436; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        :root { --primary: #4e73df; --bg: #f8f9fc; --success: #2ecc71; --danger: #e74c3c; --dark: #1a1a1a; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; height: 100vh; overflow: hidden; }
         
-        #lock-screen { position: fixed; inset: 0; background: #1a1a1a; display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .login-card { background: var(--dark); padding: 35px; border-radius: 25px; text-align: center; color: white; width: 85%; max-width: 300px; }
+        /* Pantalla Bloqueo */
+        #lock-screen { position: fixed; inset: 0; background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-card { background: #2d3436; padding: 35px; border-radius: 25px; text-align: center; color: white; width: 80%; max-width: 300px; }
         
-        .app-container { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: auto; padding-bottom: 80px; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
-        
-        input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        
+        /* Contenedor de Páginas */
+        .app-content { display: none; height: 100vh; flex-direction: column; }
+        .pages-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilos de Tarjetas */
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; }
         .saldo-box { text-align: center; background: var(--primary); color: white; }
         .saldo-num { font-size: 32px; font-weight: bold; }
 
-        .movimiento { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
-        .cat-tag { font-size: 10px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #666; font-weight: bold; text-transform: uppercase; }
-        
-        /* Estilos del Gestor de Categorías */
-        .cat-manager { border-top: 4px solid var(--primary); background: #ffffff; }
-        .cat-list { margin: 15px 0; }
-        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f1f3f8; padding: 10px 15px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; }
-        .btn-del-cat { color: var(--danger); font-weight: bold; cursor: pointer; padding: 5px 10px; }
+        input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+
+        /* Navegación Inferior */
+        .nav-bar { 
+            position: fixed; bottom: 0; width: 100%; height: 65px; 
+            background: white; display: flex; justify-content: space-around; 
+            align-items: center; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .nav-item { text-align: center; color: #b2bec3; font-size: 12px; flex: 1; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
+
+        /* Lista de Movimientos y Categorías */
+        .movimiento, .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
+        .cat-tag { font-size: 10px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #666; font-weight: bold; }
+        .btn-del { color: #ccc; margin-left: 10px; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
     <div class="login-card">
-        <div style="font-size: 50px; margin-bottom: 10px;">💰</div>
-        <h2>Bóveda Personal</h2>
-        <input type="password" id="pass-field" placeholder="PIN (1234)" inputmode="numeric">
+        <div style="font-size: 50px;">💰</div>
+        <h2>Mi Bóveda</h2>
+        <input type="password" id="pass-field" placeholder="PIN" inputmode="numeric">
         <button onclick="acceder()">ENTRAR</button>
     </div>
 </div>
 
-<div id="app-content" style="display:none;">
-    <div class="app-container">
+<div id="app-content" class="app-content">
+    <div class="pages-container">
         
-        <div class="card saldo-box">
-            <small>SALDO DISPONIBLE</small>
-            <div id="saldo-neto" class="saldo-num">$0.00</div>
-        </div>
+        <div id="page-home" class="page active">
+            <div class="card saldo-box">
+                <small>DISPONIBLE</small>
+                <div id="saldo-neto" class="saldo-num">$0.00</div>
+            </div>
 
-        <div class="card">
-            <h3 style="margin-top:0">📝 Registrar</h3>
-            <input type="text" id="desc" placeholder="¿En qué? (ej: Supermercado)">
-            <input type="number" id="monto" placeholder="Monto $" inputmode="decimal">
-            <select id="tipo-mov">
-                <option value="gasto">Gasto (-)</option>
-                <option value="ingreso">Ingreso (+)</option>
-            </select>
-            <label style="font-size: 12px; color: #666;">Categoría:</label>
-            <select id="select-cat"></select>
-            <button onclick="addMovimiento()">GUARDAR</button>
-        </div>
+            <div class="card">
+                <canvas id="myChart" style="max-height: 160px;"></canvas>
+            </div>
 
-        <div class="card">
-            <canvas id="myChart" style="max-height: 180px;"></canvas>
-        </div>
-
-        <div class="card">
-            <h3>🕒 Historial Reciente</h3>
-            <div id="lista-movimientos"></div>
-        </div>
-
-        <div class="card cat-manager">
-            <h3 style="margin-top:0">⚙️ Gestionar Categorías</h3>
-            <p style="font-size: 12px; color: #888;">Agrega o elimina etiquetas para tus gastos.</p>
-            
-            <div id="lista-categorias-config" class="cat-list">
-                </div>
-
-            <div style="display: flex; gap: 8px;">
-                <input type="text" id="nueva-cat-nombre" placeholder="Nombre (ej: Gym)" style="margin:0">
-                <button onclick="addCategoria()" style="width: 80px; margin:0; font-size: 12px;">+ AÑADIR</button>
+            <div class="card">
+                <h3 style="margin-top:0">🕒 Historial</h3>
+                <div id="lista-movimientos"></div>
             </div>
         </div>
 
-        <div style="padding: 10px 0;">
-            <button onclick="borrarTodo()" style="background:#dfe6e9; color:#636e72; font-size: 11px;">Resetear todos los datos</button>
-            <button onclick="location.reload()" style="background:none; color:var(--primary); margin-top:10px;">Cerrar Sesión</button>
+        <div id="page-add" class="page">
+            <div class="card">
+                <h3>📝 Nuevo Registro</h3>
+                <input type="text" id="desc" placeholder="¿En qué gastaste?">
+                <input type="number" id="monto" placeholder="Monto $" inputmode="decimal">
+                <select id="tipo-mov">
+                    <option value="gasto">Gasto (-)</option>
+                    <option value="ingreso">Ingreso (+)</option>
+                </select>
+                <small>Categoría:</small>
+                <select id="select-cat"></select>
+                <button onclick="addMovimiento()">GUARDAR</button>
+            </div>
         </div>
 
+        <div id="page-cats" class="page">
+            <div class="card">
+                <h3>⚙️ Gestionar Categorías</h3>
+                <div id="lista-categorias-config" style="margin-bottom: 20px;"></div>
+                
+                <div style="border-top: 1px solid #eee; padding-top: 15px;">
+                    <input type="text" id="nueva-cat-nombre" placeholder="Nombre nueva categoría">
+                    <button onclick="addCategoria()">+ AÑADIR CATEGORÍA</button>
+                </div>
+            </div>
+            
+            <div style="padding: 10px;">
+                <button onclick="borrarTodo()" style="background:#dfe6e9; color:#636e72; font-size: 11px;">Resetear App</button>
+                <button onclick="location.reload()" style="background:none; color:var(--primary); margin-top:10px;">Cerrar Sesión</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showPage('home', this)">
+            <span>🏠</span><br>Inicio
+        </div>
+        <div class="nav-item" onclick="showPage('add', this)">
+            <span>➕</span><br>Registrar
+        </div>
+        <div class="nav-item" onclick="showPage('cats', this)">
+            <span>🏷️</span><br>Categorías
+        </div>
     </div>
 </div>
 
 <script>
     const PIN_HASH = "81dc9bdb52d04dc20036dbd8313ed055"; // 1234
 
-    // Datos iniciales
-    let movimientos = JSON.parse(localStorage.getItem('movs_final')) || [];
-    let categorias = JSON.parse(localStorage.getItem('cats_final')) || ["General", "Comida", "Transporte", "Hogar", "Salud"];
+    let movimientos = JSON.parse(localStorage.getItem('movs_v5')) || [];
+    let categorias = JSON.parse(localStorage.getItem('cats_v5')) || ["General", "Comida", "Salud", "Ocio"];
 
     function acceder() {
-        const pin = document.getElementById('pass-field').value;
-        if(CryptoJS.MD5(pin).toString() === PIN_HASH) {
+        if(CryptoJS.MD5(document.getElementById('pass-field').value).toString() === PIN_HASH) {
             document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('app-content').style.display = 'flex';
             renderTodo();
-        } else {
-            alert("PIN Incorrecto");
         }
     }
 
+    function showPage(pageId, navEl) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        navEl.classList.add('active');
+    }
+
     function addMovimiento() {
-        const d = document.getElementById('desc').value;
-        const m = parseFloat(document.getElementById('monto').value);
-        const t = document.getElementById('tipo-mov').value;
-        const c = document.getElementById('select-cat').value;
-        
-        if(!d || isNaN(m)) return alert("Pon descripción y monto");
-        
-        movimientos.push({ id: Date.now(), d, m, t, c });
+        const d = document.getElementById('desc').value, m = parseFloat(document.getElementById('monto').value);
+        if(!d || isNaN(m)) return alert("Datos incompletos");
+        movimientos.push({ id: Date.now(), d, m, t: document.getElementById('tipo-mov').value, c: document.getElementById('select-cat').value });
         save();
-        document.getElementById('desc').value = ''; 
-        document.getElementById('monto').value = '';
+        document.getElementById('desc').value = ''; document.getElementById('monto').value = '';
+        showPage('home', document.querySelectorAll('.nav-item')[0]);
     }
 
     function addCategoria() {
-        const nombre = document.getElementById('nueva-cat-nombre').value.trim();
-        if(nombre && !categorias.includes(nombre)) {
-            categorias.push(nombre);
+        const n = document.getElementById('nueva-cat-nombre').value.trim();
+        if(n && !categorias.includes(n)) {
+            categorias.push(n);
             save();
             document.getElementById('nueva-cat-nombre').value = '';
         }
     }
 
-    function eliminarCat(nombre) {
-        if(categorias.length <= 1) return alert("Mínimo necesitas una categoría");
-        if(confirm(`¿Eliminar categoría "${nombre}"?`)) {
-            categorias = categorias.filter(c => c !== nombre);
-            // Si hay movimientos con esta categoría, los pasamos a General
-            movimientos.forEach(m => { if(m.c === nombre) m.c = "General"; });
+    function eliminarCat(n) {
+        if(categorias.length > 1) {
+            categorias = categorias.filter(c => c !== n);
+            movimientos.forEach(m => { if(m.c === n) m.c = "General"; });
             save();
         }
     }
@@ -157,70 +182,51 @@
     }
 
     function borrarTodo() {
-        if(confirm("¿Borrar todo el historial y configuraciones?")) {
-            localStorage.clear();
-            location.reload();
-        }
+        if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); }
     }
 
     function save() {
-        localStorage.setItem('movs_final', JSON.stringify(movimientos));
-        localStorage.setItem('cats_final', JSON.stringify(categorias));
+        localStorage.setItem('movs_v5', JSON.stringify(movimientos));
+        localStorage.setItem('cats_v5', JSON.stringify(categorias));
         renderTodo();
     }
 
     let chart;
     function renderTodo() {
-        // Renderizar selectores y lista de gestión
-        const select = document.getElementById('select-cat');
-        const configList = document.getElementById('lista-categorias-config');
-        select.innerHTML = ''; 
-        configList.innerHTML = '';
-        
-        categorias.forEach(cat => {
-            select.innerHTML += `<option value="${cat}">${cat}</option>`;
-            configList.innerHTML += `
-                <div class="cat-item">
-                    <span>${cat}</span>
-                    <span class="btn-del-cat" onclick="eliminarCat('${cat}')">✕</span>
-                </div>`;
+        // Categorías
+        const sel = document.getElementById('select-cat');
+        const conf = document.getElementById('lista-categorias-config');
+        sel.innerHTML = ''; conf.innerHTML = '';
+        categorias.forEach(c => {
+            sel.innerHTML += `<option value="${c}">${c}</option>`;
+            conf.innerHTML += `<div class="cat-item"><span>${c}</span><span class="btn-del" onclick="eliminarCat('${c}')">✕</span></div>`;
         });
 
-        // Renderizar Movimientos
-        const listMov = document.getElementById('lista-movimientos');
-        listMov.innerHTML = '';
+        // Historial
+        const list = document.getElementById('lista-movimientos');
+        list.innerHTML = '';
         let inc = 0, exp = 0;
-
         movimientos.slice().reverse().forEach(m => {
             if(m.t === 'ingreso') inc += m.m; else exp += m.m;
-            listMov.innerHTML += `
+            list.innerHTML += `
                 <div class="movimiento">
-                    <div>
-                        <strong>${m.d}</strong> <span class="cat-tag">${m.c}</span><br>
-                        <small style="color:#aaa">${new Date(m.id).toLocaleDateString()}</small>
-                    </div>
+                    <div><strong>${m.d}</strong> <span class="cat-tag">${m.c}</span></div>
                     <div style="color:${m.t==='ingreso'?'var(--success)':'var(--danger)'}; font-weight:bold;">
-                        ${m.t==='ingreso'?'+':'-'}$${m.m.toFixed(2)}
-                        <span onclick="borrarMov(${m.id})" style="margin-left:12px; color:#ccc; font-weight:normal;">✕</span>
+                        $${m.m.toFixed(2)} <span onclick="borrarMov(${m.id})" class="btn-del">✕</span>
                     </div>
                 </div>`;
         });
 
         document.getElementById('saldo-neto').innerText = `$${(inc - exp).toFixed(2)}`;
         
-        // Gráfico
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'doughnut',
-            data: { 
-                labels: ['Ingresos', 'Gastos'], 
-                datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }] 
-            },
+            data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }] },
             options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }
 </script>
 </body>
 </html>
-
