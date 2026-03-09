@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas Pro 💰</title>
+    <title>Finanzas Master 💰</title>
     
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
         #lock-screen { position: fixed; inset: 0; background: #1a1a1a; display: flex; justify-content: center; align-items: center; z-index: 10000; }
         .login-card { background: #2d3436; padding: 35px; border-radius: 25px; text-align: center; color: white; width: 85%; max-width: 300px; }
         
-        .app-container { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: auto; padding-bottom: 40px; }
+        .app-container { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: auto; padding-bottom: 60px; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         
         input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
@@ -29,11 +29,10 @@
         .saldo-num { font-size: 32px; font-weight: bold; }
 
         .movimiento { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
-        .cat-tag { font-size: 10px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #666; }
+        .cat-tag { font-size: 10px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #666; font-weight: bold; }
         
-        /* Estilo para gestionar categorías */
         .cat-item { display: flex; justify-content: space-between; background: #f9f9f9; padding: 8px 12px; border-radius: 8px; margin-bottom: 5px; align-items: center; }
-        .btn-del { background: none; color: var(--danger); width: auto; padding: 5px; margin: 0; }
+        .btn-del { background: none; color: var(--danger); width: auto; padding: 5px; margin: 0; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -41,8 +40,8 @@
 <div id="lock-screen">
     <div class="login-card">
         <div style="font-size: 50px;">💰</div>
-        <h2>Mi Bóveda</h2>
-        <input type="password" id="pass-field" placeholder="PIN de acceso" inputmode="numeric">
+        <h2>Mis Finanzas</h2>
+        <input type="password" id="pass-field" placeholder="PIN (1234)" inputmode="numeric">
         <button onclick="acceder()">ENTRAR</button>
     </div>
 </div>
@@ -51,37 +50,44 @@
     <div class="app-container">
         
         <div class="card saldo-box">
-            <small>SALDO TOTAL</small>
+            <small>SALDO DISPONIBLE</small>
             <div id="saldo-neto" class="saldo-num">$0.00</div>
         </div>
 
         <div class="card">
-            <h3>📝 Nuevo Registro</h3>
-            <input type="text" id="desc" placeholder="Descripción">
+            <h3 style="margin-top:0">📝 Nuevo Registro</h3>
+            <input type="text" id="desc" placeholder="Descripción (ej: Cena)">
             <input type="number" id="monto" placeholder="Monto $" inputmode="decimal">
-            <select id="tipo-mov"><option value="gasto">Gasto (-)</option><option value="ingreso">Ingreso (+)</option></select>
+            <select id="tipo-mov">
+                <option value="gasto">Gasto (-)</option>
+                <option value="ingreso">Ingreso (+)</option>
+            </select>
             <small>Categoría:</small>
             <select id="select-cat"></select>
-            <button onclick="addMovimiento()">GUARDAR</button>
+            <button onclick="addMovimiento()">GUARDAR REGISTRO</button>
         </div>
 
-        <div class="card"><canvas id="myChart" style="max-height: 200px;"></canvas></div>
+        <div class="card">
+            <canvas id="myChart" style="max-height: 180px;"></canvas>
+        </div>
 
         <div class="card">
             <h3>🕒 Historial</h3>
             <div id="lista-movimientos"></div>
         </div>
 
-        <div class="card" style="border-top: 4px solid var(--primary);">
+        <div class="card" style="border-top: 5px solid var(--primary);">
             <h3>⚙️ Configurar Categorías</h3>
-            <div id="lista-categorias-config"></div>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="nueva-cat-nombre" placeholder="Nombre (ej: Comida)">
-                <button onclick="addCategoria()" style="width: 100px; margin: 8px 0;">Añadir</button>
+            <div id="lista-categorias-config" style="margin-bottom: 15px;"></div>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="text" id="nueva-cat-nombre" placeholder="Nombre nueva categoría">
+                <button onclick="addCategoria()" style="width: 100px;">Añadir</button>
             </div>
+            <p style="font-size: 11px; color: #888;">* Al borrar una categoría, los gastos asociados volverán a "General".</p>
         </div>
 
-        <button onclick="location.reload()" style="background:#b2bec3;">Cerrar Sesión</button>
+        <button onclick="borrarTodo()" style="background:#b2bec3; font-size: 12px;">Resetear todos los datos</button>
+        <button onclick="location.reload()" style="background:none; color:var(--primary);">Cerrar Sesión</button>
     </div>
 </div>
 
@@ -89,23 +95,32 @@
     const PIN_HASH = "81dc9bdb52d04dc20036dbd8313ed055"; // Clave 1234
 
     function acceder() {
-        if(CryptoJS.MD5(document.getElementById('pass-field').value).toString() === PIN_HASH) {
+        const p = document.getElementById('pass-field').value;
+        if(CryptoJS.MD5(p).toString() === PIN_HASH) {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
             renderTodo();
+        } else {
+            alert("PIN Incorrecto");
         }
     }
 
-    // Datos persistentes
-    let movimientos = JSON.parse(localStorage.getItem('movs_v3')) || [];
-    let categorias = JSON.parse(localStorage.getItem('cats_v3')) || ["General", "Comida", "Transporte", "Hogar"];
+    // Persistencia de datos
+    let movimientos = JSON.parse(localStorage.getItem('movs_v4')) || [];
+    let categorias = JSON.parse(localStorage.getItem('cats_v4')) || ["General", "Comida", "Transporte", "Hogar", "Salud"];
 
     function addMovimiento() {
-        const d = document.getElementById('desc').value, m = parseFloat(document.getElementById('monto').value);
-        if(!d || isNaN(m)) return;
-        movimientos.push({ id: Date.now(), d, m, t: document.getElementById('tipo-mov').value, c: document.getElementById('select-cat').value });
+        const d = document.getElementById('desc').value;
+        const m = parseFloat(document.getElementById('monto').value);
+        const t = document.getElementById('tipo-mov').value;
+        const c = document.getElementById('select-cat').value;
+        
+        if(!d || isNaN(m)) return alert("Completa descripción y monto");
+        
+        movimientos.push({ id: Date.now(), d, m, t, c });
         save();
-        document.getElementById('desc').value = ''; document.getElementById('monto').value = '';
+        document.getElementById('desc').value = ''; 
+        document.getElementById('monto').value = '';
     }
 
     function addCategoria() {
@@ -118,8 +133,10 @@
     }
 
     function eliminarCat(nombre) {
-        if(categorias.length <= 1) return alert("Debes tener al menos una categoría.");
+        if(categorias.length <= 1) return alert("Mínimo una categoría");
         categorias = categorias.filter(c => c !== nombre);
+        // Reasignar movimientos de esa categoría a "General"
+        movimientos.forEach(m => { if(m.c === nombre) m.c = "General"; });
         save();
     }
 
@@ -128,25 +145,37 @@
         save();
     }
 
+    function borrarTodo() {
+        if(confirm("¿Estás seguro de borrar TODO el historial?")) {
+            movimientos = [];
+            save();
+        }
+    }
+
     function save() {
-        localStorage.setItem('movs_v3', JSON.stringify(movimientos));
-        localStorage.setItem('cats_v3', JSON.stringify(categorias));
+        localStorage.setItem('movs_v4', JSON.stringify(movimientos));
+        localStorage.setItem('cats_v4', JSON.stringify(categorias));
         renderTodo();
     }
 
     let chart;
     function renderTodo() {
-        // 1. Render Categorías en el Select y en la Configuración
+        // Renderizar Selects de categorías
         const select = document.getElementById('select-cat');
         const configList = document.getElementById('lista-categorias-config');
-        select.innerHTML = ''; configList.innerHTML = '';
+        select.innerHTML = ''; 
+        configList.innerHTML = '';
         
         categorias.forEach(cat => {
             select.innerHTML += `<option value="${cat}">${cat}</option>`;
-            configList.innerHTML += `<div class="cat-item"><span>${cat}</span><button class="btn-del" onclick="eliminarCat('${cat}')">✕</button></div>`;
+            configList.innerHTML += `
+                <div class="cat-item">
+                    <span>${cat}</span>
+                    <button class="btn-del" onclick="eliminarCat('${cat}')">✕</button>
+                </div>`;
         });
 
-        // 2. Render Movimientos
+        // Renderizar Movimientos e Historial
         const listMov = document.getElementById('lista-movimientos');
         listMov.innerHTML = '';
         let inc = 0, exp = 0;
@@ -161,22 +190,26 @@
                     </div>
                     <div style="color:${m.t==='ingreso'?'var(--success)':'var(--danger)'}; font-weight:bold;">
                         ${m.t==='ingreso'?'+':'-'}$${m.m.toFixed(2)}
-                        <span onclick="borrarMov(${m.id})" style="margin-left:8px; color:#ccc; font-weight:normal;">✕</span>
+                        <span onclick="borrarMov(${m.id})" style="margin-left:8px; color:#ccc;">✕</span>
                     </div>
                 </div>`;
         });
 
         document.getElementById('saldo-neto').innerText = `$${(inc - exp).toFixed(2)}`;
         
-        // 3. Gráfico
+        // Actualizar Gráfico
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'doughnut',
-            data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }] },
+            data: { 
+                labels: ['Ingresos', 'Gastos'], 
+                datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }] 
+            },
             options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }
 </script>
 </body>
 </html>
+
