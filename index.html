@@ -3,144 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi Bóveda 💰</title>
+    <title>Finanzas Móvil 💰</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
-        :root { --primary: #4e73df; --bg: #f8f9fc; --dark: #1a1a1a; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        
-        /* LOGIN ADAPTABLE */
-        #lock-screen { position: fixed; inset: 0; background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .login-card { background: #2d3436; padding: 30px; border-radius: 20px; text-align: center; color: white; width: 80%; max-width: 300px; }
-        
-        /* --- MODO CELULAR (Por defecto) --- */
-        .grid { display: flex; flex-direction: column; gap: 15px; }
-        
-        /* --- MODO COMPUTADORA (Pantallas grandes) --- */
-        @media (min-width: 800px) {
-            .grid { flex-direction: row; align-items: flex-start; }
-            .main-col { flex: 2; }
-            .sidebar { flex: 1; position: sticky; top: 10px; }
+        :root {
+            --primary: #4e73df; --bg: #f4f7f6; --white: #ffffff;
+            --text: #2d3436; --success: #2ecc71; --danger: #e74c3c;
         }
 
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        input, select, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--primary); color: white; font-weight: bold; cursor: pointer; border: none; }
-        
-        /* Tabla que no se rompe en el celular */
-        .table-container { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 300px; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg); margin: 0; color: var(--text);
+            padding-bottom: 50px; /* Espacio para no chocar con el borde inferior */
+        }
+
+        /* Pantalla de Bloqueo Estilo Móvil */
+        #lock-screen {
+            position: fixed; inset: 0; background: #1a1a1a;
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-box {
+            text-align: center; width: 80%; max-width: 300px;
+        }
+        .login-box h1 { font-size: 50px; margin-bottom: 10px; }
+        .pin-input {
+            width: 100%; padding: 15px; font-size: 20px; text-align: center;
+            border-radius: 15px; border: none; margin-bottom: 15px; outline: none;
+        }
+
+        /* Contenedor Principal */
+        .app-container { padding: 15px; max-width: 500px; margin: auto; }
+
+        .card {
+            background: var(--white); border-radius: 20px; padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px;
+        }
+
+        h2 { font-size: 18px; margin-top: 0; color: #636e72; }
+
+        /* Inputs de tamaño táctil */
+        input, select, button {
+            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px;
+            border: 1px solid #dfe6e9; font-size: 16px; box-sizing: border-box;
+        }
+
+        button {
+            background: var(--primary); color: white; border: none;
+            font-weight: bold; cursor: pointer; active { transform: scale(0.98); }
+        }
+
+        /* Resumen de Saldo */
+        .balance-total { font-size: 32px; font-weight: bold; margin: 10px 0; }
+
+        /* Tabla de Movimientos */
+        .history-list { margin-top: 10px; }
+        .history-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid #f1f2f6;
+        }
+        .history-item:last-child { border: none; }
+        .item-info { display: flex; flex-direction: column; }
+        .item-monto { font-weight: bold; }
+
+        /* Gráfico */
+        .chart-container { height: 200px; position: relative; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
-    <div class="login-card">
+    <div class="login-box">
         <h1>🔒</h1>
-        <h3>Ingresa tu Clave</h3>
-        <input type="password" id="pass-field" placeholder="Clave">
-        <button onclick="acceder()">ENTRAR</button>
-        <p id="error" style="color: #ff7675; display: none;">Clave incorrecta</p>
+        <h2 style="color: white;">Bóveda Personal</h2>
+        <input type="password" id="pin" class="pin-input" placeholder="Ingresa PIN">
+        <button onclick="checkPin()">ENTRAR</button>
+        <p id="err" style="color: var(--danger); display:none; margin-top:10px;">PIN incorrecto</p>
     </div>
 </div>
 
-<div id="app-content" style="display:none;">
-    <div class="grid">
-        <div class="main-col">
-            <div class="card">
-                <h3>💰 Mi Presupuesto</h3>
-                <input type="number" id="limite" placeholder="Límite Mensual $" onchange="update()">
-                <div style="background:#eee; height:10px; border-radius:5px; margin-top:10px;">
-                    <div id="barra" style="background:red; height:100%; width:0%; border-radius:5px; transition: 0.5s;"></div>
-                </div>
-            </div>
+<div id="main-app" style="display:none;">
+    <div class="app-container">
+        <div class="card" style="text-align: center; background: var(--primary); color: white;">
+            <h2 style="color: rgba(255,255,255,0.8);">Saldo Disponible</h2>
+            <div id="total-val" class="balance-total">$0.00</div>
+        </div>
 
-            <div class="card">
-                <h3>📝 Registro Rápido</h3>
-                <input type="text" id="desc" placeholder="¿Qué compraste?">
-                <input type="number" id="monto" placeholder="Monto $">
-                <select id="tipo"><option value="gasto">Gasto (-)</option><option value="ingreso">Ingreso (+)</option></select>
-                <button onclick="add()">GUARDAR</button>
-                
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>Detalle</th><th>Monto</th><th></th></tr></thead>
-                        <tbody id="lista"></tbody>
-                    </table>
-                </div>
+        <div class="card">
+            <h2>Nuevo Registro</h2>
+            <input type="text" id="concepto" placeholder="¿Qué compraste?">
+            <input type="number" id="cantidad" placeholder="Monto $">
+            <select id="tipo">
+                <option value="gasto">Gasto (-)</option>
+                <option value="ingreso">Ingreso (+)</option>
+            </select>
+            <button onclick="agregar()">AÑADIR AHORA</button>
+        </div>
+
+        <div class="card">
+            <h2>Distribución</h2>
+            <div class="chart-container">
+                <canvas id="ctxChart"></canvas>
             </div>
         </div>
 
-        <div class="sidebar">
-            <div class="card" style="text-align:center;">
-                <h3>📊 Análisis</h3>
-                <h2 id="saldo-neto">$0.00</h2>
-                <canvas id="myChart"></canvas>
-                <button onclick="location.reload()" style="background:#666; margin-top:20px;">Cerrar Sesión</button>
-            </div>
+        <div class="card">
+            <h2>Últimos Movimientos</h2>
+            <div id="lista-mov" class="history-list"></div>
+            <button onclick="limpiar()" style="background:#b2bec3; margin-top:20px; font-size:12px;">Resetear Todo</button>
         </div>
     </div>
 </div>
 
 <script>
-    // CLAVE CONFIGURADA: 1234
-    const HASH_SECRETO = "81dc9bdb52d04dc20036dbd8313ed055"; 
+    // CLAVE: 1234
+    const PIN_HASH = "81dc9bdb52d04dc20036dbd8313ed055";
 
-    function acceder() {
-        const pass = document.getElementById('pass-field').value;
-        if(CryptoJS.MD5(pass).toString() === HASH_SECRETO) {
+    function checkPin() {
+        const val = document.getElementById('pin').value;
+        if(CryptoJS.MD5(val).toString() === PIN_HASH) {
             document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            update();
-        } else { document.getElementById('error').style.display = 'block'; }
+            document.getElementById('main-app').style.display = 'block';
+            render();
+        } else {
+            document.getElementById('err').style.display = 'block';
+        }
     }
 
-    let items = JSON.parse(localStorage.getItem('f_v10')) || [];
-    let chart;
+    let db = JSON.parse(localStorage.getItem('m_finanzas_v1')) || [];
+    let miGrafico;
 
-    function add() {
-        const d = document.getElementById('desc').value, m = parseFloat(document.getElementById('monto').value);
-        if(!d || isNaN(m)) return;
-        items.push({id: Date.now(), d, m, t: document.getElementById('tipo').value});
-        update();
-        document.getElementById('desc').value = ''; document.getElementById('monto').value = '';
+    function agregar() {
+        const c = document.getElementById('concepto').value;
+        const n = parseFloat(document.getElementById('cantidad').value);
+        if(!c || !n) return;
+
+        db.push({ id: Date.now(), c, n, t: document.getElementById('tipo').value });
+        localStorage.setItem('m_finanzas_v1', JSON.stringify(db));
+        
+        document.getElementById('concepto').value = '';
+        document.getElementById('cantidad').value = '';
+        render();
     }
 
-    function remove(id) {
-        items = items.filter(i => i.id !== id);
-        update();
+    function borrar(id) {
+        db = db.filter(x => x.id !== id);
+        localStorage.setItem('m_finanzas_v1', JSON.stringify(db));
+        render();
     }
 
-    function update() {
-        localStorage.setItem('f_v10', JSON.stringify(items));
-        const list = document.getElementById('lista');
-        list.innerHTML = '';
-        let inc = 0, exp = 0;
+    function limpiar() {
+        if(confirm("¿Seguro que quieres borrar todo?")) {
+            db = []; localStorage.clear(); render();
+        }
+    }
 
-        items.slice().reverse().forEach(i => {
-            if(i.t === 'ingreso') inc += i.m; else exp += i.m;
-            list.innerHTML += `<tr><td>${i.d}</td><td style="color:${i.t==='ingreso'?'green':'red'}">$${i.m}</td><td><button onclick="remove(${i.id})" style="padding:5px; background:none; color:red; width:auto;">X</button></td></tr>`;
+    function render() {
+        const contenedor = document.getElementById('lista-mov');
+        contenedor.innerHTML = '';
+        let ingresos = 0, gastos = 0;
+
+        db.slice().reverse().forEach(item => {
+            if(item.t === 'ingreso') ingresos += item.n; else gastos += item.n;
+            
+            contenedor.innerHTML += `
+                <div class="history-item">
+                    <div class="item-info">
+                        <strong>${item.c}</strong>
+                        <small style="color:#aaa">${new Date(item.id).toLocaleDateString()}</small>
+                    </div>
+                    <div class="item-monto" style="color:${item.t==='ingreso'?'var(--success)':'var(--danger)'}">
+                        ${item.t==='ingreso'?'+':'-'}$${item.n.toFixed(2)}
+                        <span onclick="borrar(${item.id})" style="margin-left:10px; color:#ccc; cursor:pointer">✕</span>
+                    </div>
+                </div>`;
         });
 
-        const neto = inc - exp;
-        document.getElementById('saldo-neto').innerText = `$${neto.toFixed(2)}`;
-        
-        const lim = parseFloat(document.getElementById('limite').value) || 1;
-        document.getElementById('barra').style.width = Math.min((exp/lim)*100, 100) + "%";
-
-        renderChart(inc, exp);
+        document.getElementById('total-val').innerText = `$${(ingresos - gastos).toFixed(2)}`;
+        actualizarGrafico(ingresos, gastos);
     }
 
-    function renderChart(inc, exp) {
-        const ctx = document.getElementById('myChart').getContext('2d');
-        if(chart) chart.destroy();
-        chart = new Chart(ctx, {
+    function actualizarGrafico(i, g) {
+        const ctx = document.getElementById('ctxChart').getContext('2d');
+        if(miGrafico) miGrafico.destroy();
+        miGrafico = new Chart(ctx, {
             type: 'doughnut',
-            data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'] }] }
+            data: {
+                labels: ['Ingresos', 'Gastos'],
+                datasets: [{ data: [i, g], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }
 </script>
