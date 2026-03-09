@@ -8,49 +8,73 @@
     <link rel="apple-touch-icon" href="https://img.icons8.com/emoji/192/000000/money-bag-emoji.png">
     <link rel="icon" type="image/png" href="https://img.icons8.com/emoji/32/000000/money-bag-emoji.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Finanzas">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
-        :root { --primary: #4e73df; --bg: #f8f9fc; --dark: #1a1a1a; --success: #2ecc71; --danger: #e74c3c; --warning: #f1c40f; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
+        :root { 
+            --primary: #4e73df; --bg: #f8f9fc; --dark: #1a1a1a; 
+            --success: #2ecc71; --danger: #e74c3c; --warning: #f1c40f; 
+        }
         
-        #lock-screen { position: fixed; inset: 0; background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .login-card { background: #2d3436; padding: 30px; border-radius: 20px; text-align: center; color: white; width: 85%; max-width: 300px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); margin: 0; padding: 10px; color: #333; 
+        }
         
-        /* Diseño Adaptable (Responsive) */
+        /* Pantalla de Bloqueo Móvil */
+        #lock-screen { 
+            position: fixed; inset: 0; background: var(--dark); 
+            display: flex; justify-content: center; align-items: center; z-index: 10000; 
+        }
+        .login-card { 
+            background: #2d3436; padding: 40px 20px; border-radius: 25px; 
+            text-align: center; color: white; width: 85%; max-width: 320px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        /* Diseño Adaptable */
         .grid { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 1200px; margin: auto; }
         @media (min-width: 900px) { .grid { grid-template-columns: 1fr 380px; padding: 20px; } }
 
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .meter { height: 12px; background: #eee; border-radius: 6px; margin: 10px 0; overflow: hidden; }
-        .fill { height: 100%; width: 0%; transition: 0.8s; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
-        .form-box { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        /* Inputs Grandes para dedos */
+        .form-box { display: grid; grid-template-columns: 1fr; gap: 12px; }
         @media (min-width: 600px) { .form-box { grid-template-columns: 1fr 1fr; } }
         
-        input, select, button { border: 1px solid #ddd; padding: 12px; border-radius: 8px; font-size: 16px; }
+        input, select, button { 
+            border: 1px solid #ddd; padding: 14px; border-radius: 12px; 
+            font-size: 16px; width: 100%; box-sizing: border-box; outline: none;
+        }
+        
         .btn-save { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
         
-        /* Contenedor para que la tabla no rompa el móvil */
-        .table-container { width: 100%; overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; min-width: 450px; border-collapse: collapse; }
-        td, th { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        /* Barras de Progreso */
+        .meter { height: 14px; background: #eee; border-radius: 7px; margin: 10px 0; overflow: hidden; }
+        .fill { height: 100%; width: 0%; transition: 1s ease-in-out; }
         
-        #myChart { max-height: 250px; margin: auto; }
+        /* Tabla con Scroll para Móvil */
+        .table-container { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 10px; }
+        table { width: 100%; min-width: 400px; border-collapse: collapse; }
+        td, th { padding: 15px 10px; text-align: left; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
+        
+        #myChart { width: 100% !important; max-height: 250px; margin: 15px auto; }
+        .saldo-num { font-size: 2.5rem; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
     <div class="login-card">
-        <h1 style="font-size: 3rem; margin:0;">💰</h1>
-        <h2>Mi Bóveda</h2>
-        <input type="password" id="pass-field" style="width:80%;" placeholder="Clave">
-        <button onclick="acceder()" style="width:90%; margin-top:10px; background:var(--primary); color:white; border:none; padding:12px; border-radius:8px;">Entrar</button>
-        <p id="error" style="color: #ff7675; display: none;">Clave Incorrecta</p>
+        <h1 style="font-size: 4rem; margin:0;">💰</h1>
+        <h2 style="font-weight: 300; margin-bottom: 20px;">Mi Bóveda</h2>
+        <input type="password" id="pass-field" placeholder="Contraseña">
+        <button onclick="acceder()" style="margin-top:20px; background:var(--primary); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold;">DESBLOQUEAR</button>
+        <p id="error" style="color: #ff7675; display: none; margin-top:15px;">Clave incorrecta</p>
     </div>
 </div>
 
@@ -58,40 +82,43 @@
     <div class="grid">
         <div class="main-col">
             <div class="card">
-                <h3>🎯 Presupuesto y Metas</h3>
-                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <h3 style="margin-top:0">🎯 Presupuesto y Metas</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
                     <div>
-                        <small>Límite Mensual ($)</small>
-                        <input type="number" id="limite-val" style="width:90%" onchange="update()">
+                        <small style="color:#888">Límite Mensual de Gastos ($)</small>
+                        <input type="number" id="limite-val" placeholder="Ej: 1500" onchange="update()">
                         <div class="meter"><div id="fill-presupuesto" class="fill"></div></div>
                     </div>
                     <div>
-                        <small>Meta: <input type="text" id="meta-nombre" style="border:none; border-bottom:1px solid #ddd; width:60px;"></small>
-                        <input type="number" id="meta-monto" style="width:90%" onchange="update()">
+                        <small style="color:#888">Ahorro para: <input type="text" id="meta-nombre" style="border:none; border-bottom:1px solid #ddd; width:100px; padding:2px; font-size:14px;" onchange="update()"></small>
+                        <input type="number" id="meta-monto" placeholder="Monto objetivo $" onchange="update()">
                         <div class="meter"><div id="fill-meta" class="fill" style="background:var(--warning)"></div></div>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>📝 Registro</h3>
+            <div class="card" style="margin-top:15px;">
+                <h3 style="margin-top:0">📝 Nuevo Movimiento</h3>
                 <div class="form-box">
-                    <input type="text" id="desc" placeholder="¿En qué gastaste?">
+                    <input type="text" id="desc" placeholder="Descripción">
                     <input type="number" id="monto" placeholder="Monto $">
-                    <select id="tipo"><option value="gasto">Gasto (-)</option><option value="ingreso">Ingreso (+)</option></select>
-                    <select id="cat">
-                        <option value="Comida">Comida</option>
-                        <option value="Hogar">Hogar</option>
-                        <option value="Ocio">Ocio</option>
-                        <option value="Transporte">Transporte</option>
-                        <option value="Otros">Otros</option>
+                    <select id="tipo">
+                        <option value="gasto">Gasto (-)</option>
+                        <option value="ingreso">Ingreso (+)</option>
                     </select>
-                    <button class="btn-save" onclick="add()">Guardar</button>
+                    <select id="cat">
+                        <option value="Comida">🍴 Comida</option>
+                        <option value="Hogar">🏠 Hogar</option>
+                        <option value="Ocio">🎬 Ocio</option>
+                        <option value="Transporte">🚗 Transporte</option>
+                        <option value="Otros">📦 Otros</option>
+                    </select>
+                    <button class="btn-save" onclick="add()">GUARDAR REGISTRO</button>
                 </div>
                 
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th><th></th></tr></thead>
+                        <thead><tr><th>Detalle</th><th>Monto</th><th></th></tr></thead>
                         <tbody id="lista"></tbody>
                     </table>
                 </div>
@@ -100,42 +127,61 @@
 
         <div class="sidebar">
             <div class="card" style="text-align:center;">
-                <small>SALDO NETO</small>
-                <h1 id="saldo-neto">$0.00</h1>
-                <canvas id="myChart"></canvas>
-                <button onclick="exportarExcel()" style="width:100%; margin-top:20px; background:var(--success); color:white;">📥 Excel</button>
-                <button onclick="location.reload()" style="background:none; border:none; color:var(--primary); margin-top:15px; cursor:pointer;">Cerrar Sesión</button>
+                <small style="color:#888; letter-spacing: 1px;">DISPONIBLE ACTUAL</small>
+                <div id="saldo-neto" class="saldo-num">$0.00</div>
+                <div style="height: 250px;"><canvas id="myChart"></canvas></div>
+                
+                <button onclick="exportarExcel()" style="width:100%; margin-top:20px; background:var(--success); color:white; border:none; font-weight:bold;">📥 DESCARGAR EXCEL</button>
+                
+                <button onclick="location.reload()" style="background:none; border:none; color:var(--primary); margin-top:20px; cursor:pointer; font-weight:bold; font-size:14px;">🔒 CERRAR SESIÓN</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // CAMBIA AQUÍ TU CONTRASEÑA (Actual: maria)
-    const HASH_SECRETO = "bf4510087dfcb6705b16b206870a8d5a"; 
+    // CLAVE DE ACCESO: maria
+    const HASH_SECRETO = "263bce650e68abc47f84c74675000ca2"; 
 
     function acceder() {
         const pass = document.getElementById('pass-field').value;
+        // Comparamos el MD5 de lo escrito con el hash de "maria"
         if(CryptoJS.MD5(pass).toString() === HASH_SECRETO) {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
-            cargarMetas(); update();
-        } else { document.getElementById('error').style.display = 'block'; }
+            cargarMetas();
+            update();
+        } else {
+            document.getElementById('error').style.display = 'block';
+        }
     }
 
     let items = JSON.parse(localStorage.getItem('f_vFinal')) || [];
     let chart;
 
     function add() {
-        const d = document.getElementById('desc').value, m = parseFloat(document.getElementById('monto').value);
+        const d = document.getElementById('desc').value;
+        const m = parseFloat(document.getElementById('monto').value);
         if(!d || isNaN(m)) return;
-        items.push({id: Date.now(), d, m, t: document.getElementById('tipo').value, c: document.getElementById('cat').value});
+        
+        items.push({
+            id: Date.now(),
+            d: d,
+            m: m,
+            t: document.getElementById('tipo').value,
+            c: document.getElementById('cat').value
+        });
+        
         update();
-        document.getElementById('desc').value = ''; document.getElementById('monto').value = '';
+        document.getElementById('desc').value = ''; 
+        document.getElementById('monto').value = '';
     }
 
     function remove(id) {
-        if(confirm("¿Borrar?")) { items = items.filter(i => i.id !== id); update(); }
+        if(confirm("¿Eliminar este registro?")) {
+            items = items.filter(i => i.id !== id);
+            update();
+        }
     }
 
     function cargarMetas() {
@@ -156,26 +202,41 @@
 
         items.slice().reverse().forEach(i => {
             if(i.t === 'ingreso') inc += i.m;
-            else { exp += i.m; cats[i.c] = (cats[i.c] || 0) + i.m; }
+            else { 
+                exp += i.m; 
+                if(cats[i.c] !== undefined) cats[i.c] += i.m;
+                else cats['Otros'] += i.m;
+            }
             
             list.innerHTML += `<tr>
-                <td><small>${new Date(i.id).toLocaleDateString()}</small></td>
-                <td>${i.d}</td>
-                <td style="color:${i.t==='ingreso'?'var(--success)':'var(--danger)'}">$${i.m.toFixed(2)}</td>
-                <td><button onclick="remove(${i.id})" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
+                <td><strong>${i.d}</strong><br><small style="color:#888">${new Date(i.id).toLocaleDateString()}</small></td>
+                <td style="color:${i.t === 'ingreso'?'var(--success)':'var(--danger)'}; font-weight:bold">
+                    ${i.t==='ingreso'?'+':'-'}$${i.m.toFixed(2)}
+                </td>
+                <td><button onclick="remove(${i.id})" style="border:none; background:none; font-size:18px;">🗑️</button></td>
             </tr>`;
         });
 
         const saldo = inc - exp;
-        document.getElementById('saldo-neto').innerText = `$${saldo.toFixed(2)}`;
+        const displaySaldo = document.getElementById('saldo-neto');
+        displaySaldo.innerText = `$${saldo.toFixed(2)}`;
+        displaySaldo.style.color = saldo >= 0 ? 'var(--dark)' : 'var(--danger)';
         
-        // Barras
+        // Actualizar Barras de Progreso
         const limit = parseFloat(document.getElementById('limite-val').value) || 0;
-        document.getElementById('fill-presupuesto').style.width = Math.min((exp/limit)*100, 100) + "%";
-        document.getElementById('fill-presupuesto').style.background = exp > limit ? 'var(--danger)' : 'var(--success)';
+        const fillP = document.getElementById('fill-presupuesto');
+        if(limit > 0) {
+            const percP = Math.min((exp/limit)*100, 100);
+            fillP.style.width = percP + "%";
+            fillP.style.background = exp > limit ? 'var(--danger)' : 'var(--success)';
+        }
 
         const meta = parseFloat(document.getElementById('meta-monto').value) || 0;
-        document.getElementById('fill-meta').style.width = Math.min((saldo/meta)*100, 100) + "%";
+        const fillM = document.getElementById('fill-meta');
+        if(meta > 0) {
+            const percM = Math.min((saldo/meta)*100, 100);
+            fillM.style.width = Math.max(percM, 0) + "%";
+        }
 
         renderChart(cats);
     }
@@ -185,19 +246,33 @@
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'doughnut',
-            data: { labels: Object.keys(data), datasets: [{ data: Object.values(data), backgroundColor: ['#ff7675','#74b9ff','#ffeaa7','#55efc4','#a29bfe'] }] },
-            options: { plugins: { legend: { position: 'bottom' } }, maintainAspectRatio: false }
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: ['#ff7675','#74b9ff','#ffeaa7','#55efc4','#a29bfe'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                maintainAspectRatio: false
+            }
         });
     }
 
     function exportarExcel() {
-        let csv = "Fecha,Detalle,Tipo,Monto\n";
-        items.forEach(i => csv += `${new Date(i.id).toLocaleDateString()},${i.d},${i.t},${i.m}\n`);
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'Finanzas.csv';
-        a.click();
+        let csv = "\uFEFFFecha,Concepto,Tipo,Monto\n";
+        items.forEach(i => {
+            csv += `${new Date(i.id).toLocaleDateString()},${i.d},${i.t},${i.m}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "Mis_Finanzas.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 </body>
