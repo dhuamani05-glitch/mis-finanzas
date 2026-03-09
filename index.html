@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mis Finanzas 💰</title>
+    <title>Finanzas Pro 💰</title>
     
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -14,59 +13,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
-        :root { --primary: #4e73df; --bg: #f8f9fc; --dark: #1a1a1a; --success: #2ecc71; --danger: #e74c3c; }
+        :root { --primary: #4e73df; --bg: #f8f9fc; --success: #2ecc71; --danger: #e74c3c; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: var(--bg); margin: 0; padding: 15px; color: #333; 
-        }
-
-        /* Pantalla de Bloqueo */
-        #lock-screen { 
-            position: fixed; inset: 0; background: var(--dark); 
-            display: flex; justify-content: center; align-items: center; z-index: 10000; 
-        }
-        .login-card { 
-            background: #2d3436; padding: 35px; border-radius: 25px; 
-            text-align: center; color: white; width: 85%; max-width: 300px; 
-        }
+        #lock-screen { position: fixed; inset: 0; background: #1a1a1a; display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-card { background: #2d3436; padding: 35px; border-radius: 25px; text-align: center; color: white; width: 85%; max-width: 300px; }
         
-        /* Diseño Móvil (Una sola columna) */
-        .app-container { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: auto; }
+        .app-container { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: auto; padding-bottom: 40px; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         
-        input, select, button { 
-            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; 
-            border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none;
-        }
-        
+        input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
         button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        button:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* Saldo Grande */
-        .saldo-box { text-align: center; background: var(--primary); color: white; }
-        .saldo-num { font-size: 32px; font-weight: bold; margin: 5px 0; }
-
-        /* Lista de movimientos */
-        .movimiento { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 0; border-bottom: 1px solid #f1f1f1; 
-        }
-        .mov-info { display: flex; flex-direction: column; }
-        .mov-monto { font-weight: bold; }
         
-        #myChart { max-height: 200px; margin: 10px 0; }
+        .saldo-box { text-align: center; background: var(--primary); color: white; }
+        .saldo-num { font-size: 32px; font-weight: bold; }
+
+        .movimiento { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
+        .cat-tag { font-size: 10px; background: #eee; padding: 2px 8px; border-radius: 10px; color: #666; }
+        
+        /* Estilo para gestionar categorías */
+        .cat-item { display: flex; justify-content: space-between; background: #f9f9f9; padding: 8px 12px; border-radius: 8px; margin-bottom: 5px; align-items: center; }
+        .btn-del { background: none; color: var(--danger); width: auto; padding: 5px; margin: 0; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
     <div class="login-card">
-        <div style="font-size: 50px; margin-bottom: 10px;">💰</div>
-        <h2 style="margin: 0 0 20px 0; font-weight: 400;">Bóveda de Gastos</h2>
-        <input type="password" id="pass-field" placeholder="Ingresa PIN" inputmode="numeric">
-        <button onclick="acceder()">DESBLOQUEAR</button>
-        <p id="error" style="color: #ff7675; display: none; margin-top: 15px;">PIN Incorrecto</p>
+        <div style="font-size: 50px;">💰</div>
+        <h2>Mi Bóveda</h2>
+        <input type="password" id="pass-field" placeholder="PIN de acceso" inputmode="numeric">
+        <button onclick="acceder()">ENTRAR</button>
     </div>
 </div>
 
@@ -74,126 +51,130 @@
     <div class="app-container">
         
         <div class="card saldo-box">
-            <small style="opacity: 0.8;">DISPONIBLE ACTUAL</small>
+            <small>SALDO TOTAL</small>
             <div id="saldo-neto" class="saldo-num">$0.00</div>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0">📝 Registrar Movimiento</h3>
-            <input type="text" id="desc" placeholder="¿En qué gastaste?">
+            <h3>📝 Nuevo Registro</h3>
+            <input type="text" id="desc" placeholder="Descripción">
             <input type="number" id="monto" placeholder="Monto $" inputmode="decimal">
-            <select id="tipo">
-                <option value="gasto">Gasto (-)</option>
-                <option value="ingreso">Ingreso (+)</option>
-            </select>
-            <button onclick="add()">GUARDAR</button>
+            <select id="tipo-mov"><option value="gasto">Gasto (-)</option><option value="ingreso">Ingreso (+)</option></select>
+            <small>Categoría:</small>
+            <select id="select-cat"></select>
+            <button onclick="addMovimiento()">GUARDAR</button>
         </div>
 
-        <div class="card">
-            <h3>📊 Resumen Visual</h3>
-            <canvas id="myChart"></canvas>
-        </div>
+        <div class="card"><canvas id="myChart" style="max-height: 200px;"></canvas></div>
 
         <div class="card">
             <h3>🕒 Historial</h3>
             <div id="lista-movimientos"></div>
-            <button onclick="borrarTodo()" style="background:#b2bec3; margin-top:20px; font-size:12px;">Limpiar Historial</button>
-            <button onclick="location.reload()" style="background:none; color:var(--primary); margin-top:10px;">Cerrar Sesión</button>
         </div>
 
+        <div class="card" style="border-top: 4px solid var(--primary);">
+            <h3>⚙️ Configurar Categorías</h3>
+            <div id="lista-categorias-config"></div>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="nueva-cat-nombre" placeholder="Nombre (ej: Comida)">
+                <button onclick="addCategoria()" style="width: 100px; margin: 8px 0;">Añadir</button>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" style="background:#b2bec3;">Cerrar Sesión</button>
     </div>
 </div>
 
 <script>
-    // CLAVE DE ACCESO: 1234
-    const HASH_CORRECTO = "81dc9bdb52d04dc20036dbd8313ed055"; 
+    const PIN_HASH = "81dc9bdb52d04dc20036dbd8313ed055"; // Clave 1234
 
     function acceder() {
-        const pass = document.getElementById('pass-field').value;
-        if(CryptoJS.MD5(pass).toString() === HASH_CORRECTO) {
+        if(CryptoJS.MD5(document.getElementById('pass-field').value).toString() === PIN_HASH) {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
-            update();
-        } else {
-            document.getElementById('error').style.display = 'block';
+            renderTodo();
         }
     }
 
-    let items = JSON.parse(localStorage.getItem('finanzas_movil_v2')) || [];
-    let chart;
+    // Datos persistentes
+    let movimientos = JSON.parse(localStorage.getItem('movs_v3')) || [];
+    let categorias = JSON.parse(localStorage.getItem('cats_v3')) || ["General", "Comida", "Transporte", "Hogar"];
 
-    function add() {
-        const d = document.getElementById('desc').value;
-        const m = parseFloat(document.getElementById('monto').value);
+    function addMovimiento() {
+        const d = document.getElementById('desc').value, m = parseFloat(document.getElementById('monto').value);
         if(!d || isNaN(m)) return;
-        
-        items.push({ id: Date.now(), d, m, t: document.getElementById('tipo').value });
+        movimientos.push({ id: Date.now(), d, m, t: document.getElementById('tipo-mov').value, c: document.getElementById('select-cat').value });
         save();
-        document.getElementById('desc').value = ''; 
-        document.getElementById('monto').value = '';
+        document.getElementById('desc').value = ''; document.getElementById('monto').value = '';
     }
 
-    function borrarItem(id) {
-        items = items.filter(i => i.id !== id);
-        save();
-    }
-
-    function borrarTodo() {
-        if(confirm("¿Borrar todos los datos?")) {
-            items = [];
+    function addCategoria() {
+        const nombre = document.getElementById('nueva-cat-nombre').value.trim();
+        if(nombre && !categorias.includes(nombre)) {
+            categorias.push(nombre);
             save();
+            document.getElementById('nueva-cat-nombre').value = '';
         }
+    }
+
+    function eliminarCat(nombre) {
+        if(categorias.length <= 1) return alert("Debes tener al menos una categoría.");
+        categorias = categorias.filter(c => c !== nombre);
+        save();
+    }
+
+    function borrarMov(id) {
+        movimientos = movimientos.filter(m => m.id !== id);
+        save();
     }
 
     function save() {
-        localStorage.setItem('finanzas_movil_v2', JSON.stringify(items));
-        update();
+        localStorage.setItem('movs_v3', JSON.stringify(movimientos));
+        localStorage.setItem('cats_v3', JSON.stringify(categorias));
+        renderTodo();
     }
 
-    function update() {
-        const list = document.getElementById('lista-movimientos');
-        list.innerHTML = '';
+    let chart;
+    function renderTodo() {
+        // 1. Render Categorías en el Select y en la Configuración
+        const select = document.getElementById('select-cat');
+        const configList = document.getElementById('lista-categorias-config');
+        select.innerHTML = ''; configList.innerHTML = '';
+        
+        categorias.forEach(cat => {
+            select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            configList.innerHTML += `<div class="cat-item"><span>${cat}</span><button class="btn-del" onclick="eliminarCat('${cat}')">✕</button></div>`;
+        });
+
+        // 2. Render Movimientos
+        const listMov = document.getElementById('lista-movimientos');
+        listMov.innerHTML = '';
         let inc = 0, exp = 0;
 
-        items.slice().reverse().forEach(i => {
-            if(i.t === 'ingreso') inc += i.m; else exp += i.m;
-            
-            list.innerHTML += `
+        movimientos.slice().reverse().forEach(m => {
+            if(m.t === 'ingreso') inc += m.m; else exp += m.m;
+            listMov.innerHTML += `
                 <div class="movimiento">
-                    <div class="mov-info">
-                        <strong>${i.d}</strong>
-                        <small style="color:#888">${new Date(i.id).toLocaleDateString()}</small>
+                    <div>
+                        <strong>${m.d}</strong> <span class="cat-tag">${m.c}</span><br>
+                        <small style="color:#aaa">${new Date(m.id).toLocaleDateString()}</small>
                     </div>
-                    <div class="mov-monto" style="color:${i.t === 'ingreso' ? 'var(--success)' : 'var(--danger)'}">
-                        ${i.t === 'ingreso' ? '+' : '-'}$${i.m.toFixed(2)}
-                        <span onclick="borrarItem(${i.id})" style="margin-left:10px; color:#ccc;">✕</span>
+                    <div style="color:${m.t==='ingreso'?'var(--success)':'var(--danger)'}; font-weight:bold;">
+                        ${m.t==='ingreso'?'+':'-'}$${m.m.toFixed(2)}
+                        <span onclick="borrarMov(${m.id})" style="margin-left:8px; color:#ccc; font-weight:normal;">✕</span>
                     </div>
                 </div>`;
         });
 
-        const total = inc - exp;
-        document.getElementById('saldo-neto').innerText = `$${total.toFixed(2)}`;
+        document.getElementById('saldo-neto').innerText = `$${(inc - exp).toFixed(2)}`;
         
-        renderChart(inc, exp);
-    }
-
-    function renderChart(inc, exp) {
+        // 3. Gráfico
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'doughnut',
-            data: {
-                labels: ['Ingresos', 'Gastos'],
-                datasets: [{
-                    data: [inc, exp],
-                    backgroundColor: ['#2ecc71', '#e74c3c'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }
 </script>
