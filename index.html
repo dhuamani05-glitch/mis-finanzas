@@ -3,198 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas Móvil 💰</title>
+    <title>Mis Finanzas 💰</title>
     
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
-        :root {
-            --primary: #4e73df; --bg: #f4f7f6; --white: #ffffff;
-            --text: #2d3436; --success: #2ecc71; --danger: #e74c3c;
+        :root { --primary: #4e73df; --bg: #f8f9fc; --dark: #1a1a1a; --success: #2ecc71; --danger: #e74c3c; }
+        
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); margin: 0; padding: 15px; color: #333; 
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg); margin: 0; color: var(--text);
-            padding-bottom: 50px; /* Espacio para no chocar con el borde inferior */
+        /* Pantalla de Bloqueo */
+        #lock-screen { 
+            position: fixed; inset: 0; background: var(--dark); 
+            display: flex; justify-content: center; align-items: center; z-index: 10000; 
         }
-
-        /* Pantalla de Bloqueo Estilo Móvil */
-        #lock-screen {
-            position: fixed; inset: 0; background: #1a1a1a;
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        .login-card { 
+            background: #2d3436; padding: 35px; border-radius: 25px; 
+            text-align: center; color: white; width: 85%; max-width: 300px; 
         }
-        .login-box {
-            text-align: center; width: 80%; max-width: 300px;
+        
+        /* Diseño Móvil (Una sola columna) */
+        .app-container { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        input, select, button { 
+            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; 
+            border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none;
         }
-        .login-box h1 { font-size: 50px; margin-bottom: 10px; }
-        .pin-input {
-            width: 100%; padding: 15px; font-size: 20px; text-align: center;
-            border-radius: 15px; border: none; margin-bottom: 15px; outline: none;
+        
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* Saldo Grande */
+        .saldo-box { text-align: center; background: var(--primary); color: white; }
+        .saldo-num { font-size: 32px; font-weight: bold; margin: 5px 0; }
+
+        /* Lista de movimientos */
+        .movimiento { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 0; border-bottom: 1px solid #f1f1f1; 
         }
-
-        /* Contenedor Principal */
-        .app-container { padding: 15px; max-width: 500px; margin: auto; }
-
-        .card {
-            background: var(--white); border-radius: 20px; padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px;
-        }
-
-        h2 { font-size: 18px; margin-top: 0; color: #636e72; }
-
-        /* Inputs de tamaño táctil */
-        input, select, button {
-            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px;
-            border: 1px solid #dfe6e9; font-size: 16px; box-sizing: border-box;
-        }
-
-        button {
-            background: var(--primary); color: white; border: none;
-            font-weight: bold; cursor: pointer; active { transform: scale(0.98); }
-        }
-
-        /* Resumen de Saldo */
-        .balance-total { font-size: 32px; font-weight: bold; margin: 10px 0; }
-
-        /* Tabla de Movimientos */
-        .history-list { margin-top: 10px; }
-        .history-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid #f1f2f6;
-        }
-        .history-item:last-child { border: none; }
-        .item-info { display: flex; flex-direction: column; }
-        .item-monto { font-weight: bold; }
-
-        /* Gráfico */
-        .chart-container { height: 200px; position: relative; }
+        .mov-info { display: flex; flex-direction: column; }
+        .mov-monto { font-weight: bold; }
+        
+        #myChart { max-height: 200px; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
-    <div class="login-box">
-        <h1>🔒</h1>
-        <h2 style="color: white;">Bóveda Personal</h2>
-        <input type="password" id="pin" class="pin-input" placeholder="Ingresa PIN">
-        <button onclick="checkPin()">ENTRAR</button>
-        <p id="err" style="color: var(--danger); display:none; margin-top:10px;">PIN incorrecto</p>
+    <div class="login-card">
+        <div style="font-size: 50px; margin-bottom: 10px;">💰</div>
+        <h2 style="margin: 0 0 20px 0; font-weight: 400;">Bóveda de Gastos</h2>
+        <input type="password" id="pass-field" placeholder="Ingresa PIN" inputmode="numeric">
+        <button onclick="acceder()">DESBLOQUEAR</button>
+        <p id="error" style="color: #ff7675; display: none; margin-top: 15px;">PIN Incorrecto</p>
     </div>
 </div>
 
-<div id="main-app" style="display:none;">
+<div id="app-content" style="display:none;">
     <div class="app-container">
-        <div class="card" style="text-align: center; background: var(--primary); color: white;">
-            <h2 style="color: rgba(255,255,255,0.8);">Saldo Disponible</h2>
-            <div id="total-val" class="balance-total">$0.00</div>
+        
+        <div class="card saldo-box">
+            <small style="opacity: 0.8;">DISPONIBLE ACTUAL</small>
+            <div id="saldo-neto" class="saldo-num">$0.00</div>
         </div>
 
         <div class="card">
-            <h2>Nuevo Registro</h2>
-            <input type="text" id="concepto" placeholder="¿Qué compraste?">
-            <input type="number" id="cantidad" placeholder="Monto $">
+            <h3 style="margin-top:0">📝 Registrar Movimiento</h3>
+            <input type="text" id="desc" placeholder="¿En qué gastaste?">
+            <input type="number" id="monto" placeholder="Monto $" inputmode="decimal">
             <select id="tipo">
                 <option value="gasto">Gasto (-)</option>
                 <option value="ingreso">Ingreso (+)</option>
             </select>
-            <button onclick="agregar()">AÑADIR AHORA</button>
+            <button onclick="add()">GUARDAR</button>
         </div>
 
         <div class="card">
-            <h2>Distribución</h2>
-            <div class="chart-container">
-                <canvas id="ctxChart"></canvas>
-            </div>
+            <h3>📊 Resumen Visual</h3>
+            <canvas id="myChart"></canvas>
         </div>
 
         <div class="card">
-            <h2>Últimos Movimientos</h2>
-            <div id="lista-mov" class="history-list"></div>
-            <button onclick="limpiar()" style="background:#b2bec3; margin-top:20px; font-size:12px;">Resetear Todo</button>
+            <h3>🕒 Historial</h3>
+            <div id="lista-movimientos"></div>
+            <button onclick="borrarTodo()" style="background:#b2bec3; margin-top:20px; font-size:12px;">Limpiar Historial</button>
+            <button onclick="location.reload()" style="background:none; color:var(--primary); margin-top:10px;">Cerrar Sesión</button>
         </div>
+
     </div>
 </div>
 
 <script>
-    // CLAVE: 1234
-    const PIN_HASH = "81dc9bdb52d04dc20036dbd8313ed055";
+    // CLAVE DE ACCESO: 1234
+    const HASH_CORRECTO = "81dc9bdb52d04dc20036dbd8313ed055"; 
 
-    function checkPin() {
-        const val = document.getElementById('pin').value;
-        if(CryptoJS.MD5(val).toString() === PIN_HASH) {
+    function acceder() {
+        const pass = document.getElementById('pass-field').value;
+        if(CryptoJS.MD5(pass).toString() === HASH_CORRECTO) {
             document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            render();
+            document.getElementById('app-content').style.display = 'block';
+            update();
         } else {
-            document.getElementById('err').style.display = 'block';
+            document.getElementById('error').style.display = 'block';
         }
     }
 
-    let db = JSON.parse(localStorage.getItem('m_finanzas_v1')) || [];
-    let miGrafico;
+    let items = JSON.parse(localStorage.getItem('finanzas_movil_v2')) || [];
+    let chart;
 
-    function agregar() {
-        const c = document.getElementById('concepto').value;
-        const n = parseFloat(document.getElementById('cantidad').value);
-        if(!c || !n) return;
-
-        db.push({ id: Date.now(), c, n, t: document.getElementById('tipo').value });
-        localStorage.setItem('m_finanzas_v1', JSON.stringify(db));
+    function add() {
+        const d = document.getElementById('desc').value;
+        const m = parseFloat(document.getElementById('monto').value);
+        if(!d || isNaN(m)) return;
         
-        document.getElementById('concepto').value = '';
-        document.getElementById('cantidad').value = '';
-        render();
+        items.push({ id: Date.now(), d, m, t: document.getElementById('tipo').value });
+        save();
+        document.getElementById('desc').value = ''; 
+        document.getElementById('monto').value = '';
     }
 
-    function borrar(id) {
-        db = db.filter(x => x.id !== id);
-        localStorage.setItem('m_finanzas_v1', JSON.stringify(db));
-        render();
+    function borrarItem(id) {
+        items = items.filter(i => i.id !== id);
+        save();
     }
 
-    function limpiar() {
-        if(confirm("¿Seguro que quieres borrar todo?")) {
-            db = []; localStorage.clear(); render();
+    function borrarTodo() {
+        if(confirm("¿Borrar todos los datos?")) {
+            items = [];
+            save();
         }
     }
 
-    function render() {
-        const contenedor = document.getElementById('lista-mov');
-        contenedor.innerHTML = '';
-        let ingresos = 0, gastos = 0;
+    function save() {
+        localStorage.setItem('finanzas_movil_v2', JSON.stringify(items));
+        update();
+    }
 
-        db.slice().reverse().forEach(item => {
-            if(item.t === 'ingreso') ingresos += item.n; else gastos += item.n;
+    function update() {
+        const list = document.getElementById('lista-movimientos');
+        list.innerHTML = '';
+        let inc = 0, exp = 0;
+
+        items.slice().reverse().forEach(i => {
+            if(i.t === 'ingreso') inc += i.m; else exp += i.m;
             
-            contenedor.innerHTML += `
-                <div class="history-item">
-                    <div class="item-info">
-                        <strong>${item.c}</strong>
-                        <small style="color:#aaa">${new Date(item.id).toLocaleDateString()}</small>
+            list.innerHTML += `
+                <div class="movimiento">
+                    <div class="mov-info">
+                        <strong>${i.d}</strong>
+                        <small style="color:#888">${new Date(i.id).toLocaleDateString()}</small>
                     </div>
-                    <div class="item-monto" style="color:${item.t==='ingreso'?'var(--success)':'var(--danger)'}">
-                        ${item.t==='ingreso'?'+':'-'}$${item.n.toFixed(2)}
-                        <span onclick="borrar(${item.id})" style="margin-left:10px; color:#ccc; cursor:pointer">✕</span>
+                    <div class="mov-monto" style="color:${i.t === 'ingreso' ? 'var(--success)' : 'var(--danger)'}">
+                        ${i.t === 'ingreso' ? '+' : '-'}$${i.m.toFixed(2)}
+                        <span onclick="borrarItem(${i.id})" style="margin-left:10px; color:#ccc;">✕</span>
                     </div>
                 </div>`;
         });
 
-        document.getElementById('total-val').innerText = `$${(ingresos - gastos).toFixed(2)}`;
-        actualizarGrafico(ingresos, gastos);
+        const total = inc - exp;
+        document.getElementById('saldo-neto').innerText = `$${total.toFixed(2)}`;
+        
+        renderChart(inc, exp);
     }
 
-    function actualizarGrafico(i, g) {
-        const ctx = document.getElementById('ctxChart').getContext('2d');
-        if(miGrafico) miGrafico.destroy();
-        miGrafico = new Chart(ctx, {
+    function renderChart(inc, exp) {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if(chart) chart.destroy();
+        chart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ['Ingresos', 'Gastos'],
-                datasets: [{ data: [i, g], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }]
+                datasets: [{
+                    data: [inc, exp],
+                    backgroundColor: ['#2ecc71', '#e74c3c'],
+                    borderWidth: 0
+                }]
             },
-            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
         });
     }
 </script>
