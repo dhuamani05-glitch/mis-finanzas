@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finanzas IA 📸</title>
+    <title>Finanzas IA Premium 📸</title>
     
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454282.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,8 +21,8 @@
         .login-card { background: #2d3436; padding: 35px; border-radius: 25px; text-align: center; color: white; width: 80%; max-width: 300px; }
         
         .app-content { display: none; height: 100vh; flex-direction: column; }
-        .pages-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 85px; }
-        .page { display: none; animation: fadeIn 0.2s ease; }
+        .pages-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -30,24 +30,21 @@
         .saldo-box { text-align: center; background: var(--primary); color: white; }
         .saldo-num { font-size: 28px; font-weight: bold; }
 
-        input, select, button, textarea { width: 100%; padding: 12px; margin: 6px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 15px; box-sizing: border-box; outline: none; font-family: inherit; }
+        input, select, button, textarea { width: 100%; padding: 12px; margin: 6px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 15px; box-sizing: border-box; outline: none; }
         button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
 
-        /* Cámara y OCR */
-        .btn-camera { background: #6c5ce7; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        #loading-ocr { display: none; color: var(--primary); font-size: 12px; text-align: center; margin-bottom: 10px; font-weight: bold; }
+        .btn-camera { background: #6c5ce7; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; }
+        #loading-ocr { display: none; background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 10px; font-size: 12px; text-align: center; margin-bottom: 10px; border: 1px solid #1967d2; }
 
-        /* Tabla */
-        .tabla-scroll { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 450px; }
-        th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; color: #666; }
-        td { padding: 10px; border-bottom: 1px solid #f1f1f1; }
+        .tabla-scroll { width: 100%; overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 500px; }
+        th { text-align: left; padding: 10px; background: #f8f9fc; border-bottom: 2px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #f1f1f1; word-break: break-word; }
 
-        /* Nav */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; display: flex; border-top: 1px solid #eee; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #b2bec3; font-size: 11px; cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; display: flex; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #b2bec3; font-size: 11px; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 22px; }
+        .nav-icon { font-size: 24px; margin-bottom: 3px; }
 
         .cat-item { display: flex; justify-content: space-between; align-items: center; background: #f1f3f8; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
     </style>
@@ -56,8 +53,8 @@
 
 <div id="lock-screen">
     <div class="login-card">
-        <div style="font-size: 50px;">🔐</div>
-        <h2>Finanzas IA</h2>
+        <div style="font-size: 50px;">🔒</div>
+        <h2>Control Financiero</h2>
         <input type="password" id="pass-field" placeholder="PIN" inputmode="numeric">
         <button onclick="acceder()">ENTRAR</button>
     </div>
@@ -68,16 +65,21 @@
         
         <div id="page-home" class="page active">
             <div class="card saldo-box">
-                <small>BALANCE TOTAL</small>
+                <small>DISPONIBLE ACTUAL</small>
                 <div id="saldo-neto" class="saldo-num">$0.00</div>
             </div>
             <div class="card" style="padding: 10px;"><canvas id="myChart" style="max-height: 140px;"></canvas></div>
             <div class="card">
-                <h3>🕒 Historial</h3>
+                <h3>🕒 Historial Detallado</h3>
                 <div class="tabla-scroll">
                     <table>
                         <thead>
-                            <tr><th>Descripción</th><th>Categoría</th><th>Nota</th><th style="text-align:right">Cant.</th></tr>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Categoría</th>
+                                <th>Comprobante / Nota</th>
+                                <th style="text-align:right">Monto</th>
+                            </tr>
                         </thead>
                         <tbody id="body-historial"></tbody>
                     </table>
@@ -87,37 +89,50 @@
 
         <div id="page-add" class="page">
             <div class="card">
-                <h3>📝 Registro con Foto</h3>
-                <div id="loading-ocr">⏳ Procesando imagen... espera un momento</div>
+                <h3>📸 Escanear Comprobante</h3>
+                <div id="loading-ocr">🌀 Leyendo datos de la factura... por favor espera.</div>
                 
                 <button class="btn-camera" onclick="document.getElementById('file-input').click()">
-                    <span>📷</span> ESCANEAR BOLETA
+                    <span>📷</span> CAPTURAR BOLETA
                 </button>
                 <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none" onchange="processImage(this)">
 
-                <input type="text" id="desc" placeholder="Descripción">
+                <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+
+                <label><small>Nombre de Empresa:</small></label>
+                <input type="text" id="desc" placeholder="Nombre de la empresa">
+                
+                <label><small>Tipo:</small></label>
                 <select id="tipo-mov">
                     <option value="gasto">Gasto (-)</option>
                     <option value="ingreso">Ingreso (+)</option>
                 </select>
-                <input type="number" id="monto" placeholder="Cantidad $" inputmode="decimal">
-                <small>Categoría:</small>
+                
+                <label><small>Cantidad / Total:</small></label>
+                <input type="number" id="monto" placeholder="0.00" inputmode="decimal">
+                
+                <label><small>Categoría:</small></label>
                 <select id="select-cat"></select>
-                <textarea id="nota" placeholder="Nota adicional" rows="2"></textarea>
-                <button onclick="addMovimiento()">GUARDAR REGISTRO</button>
+                
+                <label><small>Nro. Comprobante / Nota:</small></label>
+                <textarea id="nota" placeholder="Número de serie o nota adicional" rows="2"></textarea>
+                
+                <button onclick="addMovimiento()" style="background:var(--success); margin-top:10px;">💾 GUARDAR EN HISTORIAL</button>
             </div>
         </div>
 
         <div id="page-config" class="page">
             <div class="card">
-                <h3>🏷️ Mis Categorías</h3>
+                <h3>⚙️ Gestión de Categorías</h3>
                 <div id="lista-categorias-config"></div>
                 <div style="margin-top: 15px;">
-                    <input type="text" id="nueva-cat-nombre" placeholder="Nueva categoría">
-                    <button onclick="addCategoria()">+ Añadir</button>
+                    <input type="text" id="nueva-cat-nombre" placeholder="Nombre de categoría">
+                    <button onclick="addCategoria()">Añadir Nueva</button>
                 </div>
             </div>
-            <button onclick="borrarTodo()" style="background:#f8d7da; color:#721c24; border: 1px solid #f5c6cb;">Resetear Todo</button>
+            <div style="padding:10px;">
+                <button onclick="borrarTodo()" style="background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; font-size:12px;">Resetear Datos</button>
+            </div>
         </div>
 
     </div>
@@ -125,14 +140,14 @@
     <div class="nav-bar">
         <div class="nav-item active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span>Inicio</div>
         <div class="nav-item" onclick="showPage('add', this)"><span class="nav-icon">➕</span>Anotar</div>
-        <div class="nav-item" onclick="showPage('config', this)"><span class="nav-icon">⚙️</span>Ajustes</div>
+        <div class="nav-item" onclick="showPage('config', this)"><span class="nav-icon">⚙️</span>Categorías</div>
     </div>
 </div>
 
 <script>
     const PIN_HASH = "81dc9bdb52d04dc20036dbd8313ed055"; // 1234
-    let movimientos = JSON.parse(localStorage.getItem('movs_v7')) || [];
-    let categorias = JSON.parse(localStorage.getItem('cats_v7')) || ["General", "Comida", "Transporte", "Supermercado"];
+    let movimientos = JSON.parse(localStorage.getItem('movs_v8')) || [];
+    let categorias = JSON.parse(localStorage.getItem('cats_v8')) || ["General", "Alimentos", "Servicios", "Compras"];
 
     function acceder() {
         if(CryptoJS.MD5(document.getElementById('pass-field').value).toString() === PIN_HASH) {
@@ -142,34 +157,40 @@
         }
     }
 
-    // --- LÓGICA DE ESCANEO ---
+    // --- MEJORA DE LÓGICA DE ESCANEO ---
     async function processImage(input) {
         if (!input.files || !input.files[0]) return;
-        
         const loader = document.getElementById('loading-ocr');
         loader.style.display = 'block';
         
         try {
             const result = await Tesseract.recognize(input.files[0], 'spa');
             const text = result.data.text;
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
             
-            // 1. Buscar el monto (el número más grande que suele ser el total)
+            // 1. DESCRIPCIÓN: El nombre de la empresa suele ser la primera línea relevante
+            if (lines.length > 0) {
+                document.getElementById('desc').value = lines[0].toUpperCase();
+            }
+
+            // 2. MONTO: Buscar el número más alto con decimales (Total)
             const amounts = text.match(/\d+[\.,]\d{2}/g);
             if (amounts) {
                 const cleanAmounts = amounts.map(a => parseFloat(a.replace(',', '.')));
                 document.getElementById('monto').value = Math.max(...cleanAmounts);
             }
 
-            // 2. Intentar sacar descripción (primera línea o palabra clave)
-            const lines = text.split('\n').filter(l => l.trim().length > 3);
-            if (lines.length > 0) {
-                document.getElementById('desc').value = lines[0].substring(0, 20);
-                document.getElementById('nota').value = "Escaneado: " + lines[0];
+            // 3. NOTA (Comprobante): Buscar patrones como F001, B001, Nro:
+            const nroMatch = text.match(/(F|B|S)\d{3}-\d+|N[ro|úmero].*?\d+/i);
+            if (nroMatch) {
+                document.getElementById('nota').value = nroMatch[0];
+            } else {
+                document.getElementById('nota').value = "Auto-escaneado";
             }
 
-            alert("Escaneo finalizado. Por favor, revisa los datos.");
+            alert("Lectura terminada. Verifica los campos llenos.");
         } catch (e) {
-            alert("Error al leer la imagen");
+            alert("Error al procesar la imagen");
         } finally {
             loader.style.display = 'none';
         }
@@ -184,10 +205,19 @@
 
     function addMovimiento() {
         const d = document.getElementById('desc').value, m = parseFloat(document.getElementById('monto').value);
-        if(!d || isNaN(m)) return alert("Faltan datos");
-        movimientos.push({ id: Date.now(), d, m, t: document.getElementById('tipo-mov').value, c: document.getElementById('select-cat').value, n: document.getElementById('nota').value });
+        if(!d || isNaN(m)) return alert("Completa los datos antes de guardar.");
+        
+        movimientos.push({ 
+            id: Date.now(), d, m, 
+            t: document.getElementById('tipo-mov').value, 
+            c: document.getElementById('select-cat').value, 
+            n: document.getElementById('nota').value 
+        });
+        
         save();
-        document.getElementById('desc').value = ''; document.getElementById('monto').value = ''; document.getElementById('nota').value = '';
+        document.getElementById('desc').value = ''; 
+        document.getElementById('monto').value = ''; 
+        document.getElementById('nota').value = '';
         showPage('home', document.querySelectorAll('.nav-item')[0]);
     }
 
@@ -197,13 +227,16 @@
     }
 
     function eliminarCat(nom) {
-        categorias = categorias.filter(c => c !== nom);
-        save();
+        if(confirm(`¿Borrar categoría ${nom}?`)) { categorias = categorias.filter(c => c !== nom); save(); }
+    }
+
+    function borrarMov(id) {
+        if(confirm("¿Eliminar registro?")) { movimientos = movimientos.filter(m => m.id !== id); save(); }
     }
 
     function save() {
-        localStorage.setItem('movs_v7', JSON.stringify(movimientos));
-        localStorage.setItem('cats_v7', JSON.stringify(categorias));
+        localStorage.setItem('movs_v8', JSON.stringify(movimientos));
+        localStorage.setItem('cats_v8', JSON.stringify(categorias));
         renderTodo();
     }
 
@@ -220,27 +253,31 @@
         const body = document.getElementById('body-historial');
         body.innerHTML = '';
         let inc = 0, exp = 0;
+        
         movimientos.slice().reverse().forEach(m => {
             if(m.t === 'ingreso') inc += m.m; else exp += m.m;
             body.innerHTML += `<tr>
-                <td>${m.d}</td>
-                <td><small>${m.c}</small></td>
-                <td><small>${m.n || '-'}</small></td>
-                <td style="text-align:right; color:${m.t==='ingreso'?'green':'red'}">${m.t==='ingreso'?'+':'-'}$${m.m.toFixed(2)}</td>
+                <td><strong>${m.d}</strong></td>
+                <td><span style="background:#eee; padding:2px 5px; border-radius:4px;">${m.c}</span></td>
+                <td style="color:#666">${m.n || '-'}</td>
+                <td style="text-align:right; font-weight:bold; color:${m.t==='ingreso'?'green':'red'}">
+                    ${m.t==='ingreso'?'+':'-'}$${m.m.toFixed(2)}
+                    <span onclick="borrarMov(${m.id})" style="color:#ccc; margin-left:5px">✕</span>
+                </td>
             </tr>`;
         });
-        document.getElementById('saldo-neto').innerText = `$${(inc - exp).toFixed(2)}`;
         
+        document.getElementById('saldo-neto').innerText = `$${(inc - exp).toFixed(2)}`;
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'doughnut',
             data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderWidth: 0 }] },
-            options: { maintainAspectRatio: false }
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
         });
     }
 
-    function borrarTodo() { if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); } }
+    function borrarTodo() { if(confirm("¿Limpiar todo?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
